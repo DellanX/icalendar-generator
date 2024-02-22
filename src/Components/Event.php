@@ -55,6 +55,7 @@ class Event extends Component implements HasTimezones
     private ?float $lng = null;
 
     private string $uuid;
+    private ?DateTimeValue $recurrence_id = null;
 
     private bool $withoutTimezone = false;
 
@@ -200,6 +201,13 @@ class Event extends Component implements HasTimezones
     public function uniqueIdentifier(string $uid): Event
     {
         $this->uuid = $uid;
+
+        return $this;
+    }
+    
+    public function recurrenceIdentifier(DateTimeInterface|null $recurrenceId): Event
+    {
+        $this->recurrence_id = DateTimeValue::create($recurrenceId, true);
 
         return $this;
     }
@@ -420,6 +428,10 @@ class Event extends Component implements HasTimezones
     {
         $payload
             ->property(TextProperty::create('UID', $this->uuid))
+            ->optional(
+                $this->recurrence_id,
+                fn () => DateTimeProperty::create('RECURRENCE-ID', $this->recurrence_id)
+            )
             ->property(DateTimeProperty::create('DTSTAMP', $this->created, $this->withoutTimezone))
             ->optional(
                 $this->name,
